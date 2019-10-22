@@ -5,29 +5,44 @@
 #include "index.h"
 #include "wifiCredentials.h"
 
-#ifndef STASSID
-#define STASSID "your-ssid"
-#define STAPSK  "your-password"
-#endif
-
 ESP8266WebServer server(80);
 
-const int led = 13;
+const int relay = 0;
+
+String redirectString(String IP) {
+  String redirectionHTML = {
+    "<head>"
+    "<meta http-equiv=\"refresh\" content=\"0; URL=http://"
+    };
+
+  String tmp2 = redirectionHTML + IP;
+
+  String tmp3 = {
+    "/\" />"
+    "</head>"
+  };
+  return tmp2 + tmp3;
+}
 
 void handleRoot() {
-  digitalWrite(led, 1);
+  digitalWrite(relay, 1);
   server.send(200, "text/html", indexHTML);
-  digitalWrite(led, 0);
+  digitalWrite(relay, 0);
 }
 
 void handleAction() {
   if (server.method() == HTTP_POST) {
-    server.send(404, "text/plain", "lol ok dude");
+    server.send(404, "text/html", redirectString(WiFi.localIP().toString()));
+    digitalWrite(relay, HIGH);
+    Serial.println("Making coffee...\n");
+    delay(5000);
+    digitalWrite(relay, LOW);
+    Serial.println("Done...\n");
   }
 }
 
 void handleNotFound() {
-  digitalWrite(led, 1);
+  digitalWrite(relay, 1);
   String message = "File Not Found\n\n";
   message += "URI: ";
   message += server.uri();
@@ -40,16 +55,20 @@ void handleNotFound() {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
+  digitalWrite(relay, 0);
 }
 
 void setup(void) {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
+  // relay
+  pinMode(relay, OUTPUT);
+  digitalWrite(relay, LOW);
+
+  // Server setup
   Serial.begin(115200);
+  Serial.println("Automatic Coffee Machine\n");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("");
+  Serial.println("CONNECTING...\n");
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
@@ -67,10 +86,6 @@ void setup(void) {
   }
 
   server.on("/", handleRoot);
-
-  server.on("/inline", []() {
-    server.send(200, "text/plain", "this works as well");
-  });
 
   server.on("/action", handleAction);
 

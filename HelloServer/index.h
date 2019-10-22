@@ -1,4 +1,3 @@
-// Created with https://tomeko.net/online_tools/cpp_text_escape.php?lang=en
 const char* indexHTML PROGMEM = {"<!DOCTYPE html>\n"
 "<html>\n"
 "<head>\n"
