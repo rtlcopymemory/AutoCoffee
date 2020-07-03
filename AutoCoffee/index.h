@@ -1,4 +1,4 @@
-char *index =
+const char *indexPage =
 "<!DOCTYPE html>\n"
 "<html lang=\"en\">\n"
 "  <head>\n"

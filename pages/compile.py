@@ -12,7 +12,7 @@ for file in os.listdir(path):
 for page in files:
     with open(path + "/" + page, 'r+') as source:
         with open(path + "/../AutoCoffee/" + page[:-4] + "h", 'w+') as dest:
-            dest.write("char *" + page[:-5] + " =\n")
+            dest.write("const char *" + page[:-5] + "Page =\n")
             for line in source.readlines():
                 line = re.sub("\"", "\\\"", line)
                 dest.write('"' + line[:-1] + '\\n"\n')
