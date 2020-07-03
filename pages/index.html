@@ -22,6 +22,7 @@
         text-align: center;
         padding: 1em 0;
         margin-top: 1em;
+        background-color: red;
       }
 
       .status.waiting {
@@ -48,7 +49,7 @@
   <body>
     <div class="content">
       <div class="status" id="status-div">
-        Waiting...
+        Fetching status...
       </div>
       <div class="actions">
         <button id="start-btn">
@@ -88,10 +89,12 @@
               case "0":
                 statusElement.classList.remove("running");
                 statusElement.classList.add("waiting");
+                statusElement.innerText = "Waiting...";
                 break;
               case "1":
                 statusElement.classList.remove("waiting");
                 statusElement.classList.add("running");
+                statusElement.innerText = "Running";
                 break;
             }
           });
