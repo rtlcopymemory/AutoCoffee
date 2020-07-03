@@ -11,7 +11,6 @@ const char *indexPage =
 "        padding: 0;\n"
 "        font-size: 1.8em;\n"
 "        width: 100%;\n"
-"        height: 100vh;\n"
 "      }\n"
 "\n"
 "      .content {\n"
