@@ -50,7 +50,7 @@ const char *indexPage =
 "  <body>\n"
 "    <div class=\"content\">\n"
 "      <div class=\"status\" id=\"status-div\">\n"
-"        Waiting...\n"
+"        Fetching status...\n"
 "      </div>\n"
 "      <div class=\"actions\">\n"
 "        <button id=\"start-btn\">\n"
