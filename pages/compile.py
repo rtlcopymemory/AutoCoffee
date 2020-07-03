@@ -15,5 +15,5 @@ for page in files:
             dest.write("char *" + page[:-5] + " =\n")
             for line in source.readlines():
                 line = re.sub("\"", "\\\"", line)
-                dest.write('"' + line[:-1] + '"\n')
+                dest.write('"' + line[:-1] + '\\n"\n')
             dest.write(";")
