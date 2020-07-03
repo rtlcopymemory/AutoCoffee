@@ -22,7 +22,14 @@
         text-align: center;
         padding: 1em 0;
         margin-top: 1em;
+      }
+
+      .status.waiting {
         background-color: orange;
+      }
+
+      .status.running {
+        background-color: lightgreen;
       }
 
       .actions {
@@ -40,20 +47,58 @@
   </head>
   <body>
     <div class="content">
-      <div class="status">
+      <div class="status" id="status-div">
         Waiting...
       </div>
       <div class="actions">
-        <button>
+        <button id="start-btn">
           Start
         </button>
-        <button>
-          Start 2
-        </button>
-        <button>
-          Start 3
+        <button id="stop-btn">
+          Stop
         </button>
       </div>
     </div>
+    <script>
+      let status = document.getElementById("status-div");
+      let start = document.getElementById("start-btn");
+      let stop = document.getElementById("stop-btn");
+
+      function toggle(onoff) {
+        fetch(onoff ? "/on" : "/off", {
+          method: "POST",
+        });
+      }
+
+      start.addEventListener("click", () => {
+        toggle(true);
+      });
+
+      stop.addEventListener("click", () => {
+        toggle(false);
+      });
+
+      let checkStatus = (statusElement) => {
+        fetch("/status", {
+          method: "POST",
+        })
+          .then((res) => res.text())
+          .then((data) => {
+            switch (data) {
+              case "0":
+                statusElement.classList.add("waiting");
+                break;
+              case "1":
+                statusElement.classList.add("running");
+                break;
+            }
+            // console.log("Test" + data);
+          });
+      };
+
+      setInterval(() => {
+        checkStatus(status);
+      }, 2000);
+    </script>
   </body>
 </html>
