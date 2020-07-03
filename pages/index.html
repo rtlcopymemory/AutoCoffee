@@ -86,19 +86,20 @@
           .then((data) => {
             switch (data) {
               case "0":
+                statusElement.classList.remove("running");
                 statusElement.classList.add("waiting");
                 break;
               case "1":
+                statusElement.classList.remove("waiting");
                 statusElement.classList.add("running");
                 break;
             }
-            // console.log("Test" + data);
           });
       };
 
       setInterval(() => {
         checkStatus(status);
-      }, 2000);
+      }, 1000);
     </script>
   </body>
 </html>
