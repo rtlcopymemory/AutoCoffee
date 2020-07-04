@@ -14,6 +14,10 @@ ESP8266WebServer server(80);
 const int led = 13;
 
 bool makingCoffee = false;
+unsigned long prevTime = 0;
+unsigned long deltaTime = 0;
+unsigned long tempDelta = 0;
+unsigned long endTimeDelta = 0;
 
 void handleNotFound()
 {
@@ -30,6 +34,12 @@ void handleNotFound()
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
     server.send(404, "text/plain", message);
+}
+
+void startTimer(String minutes, String seconds) {
+  deltaTime = 0;
+  prevTime = millis();
+  endTimeDelta = (minutes.toInt() * 60000) + (seconds.toInt() * 1000);
 }
 
 void setup(void)
@@ -68,6 +78,7 @@ void setup(void)
 
     server.on("/on", []() {
         makingCoffee = true;
+        startTimer(server.arg("minutes"), server.arg("seconds"));
         server.send(200, "text/plain", "ok");
     });
 
@@ -82,12 +93,20 @@ void setup(void)
     Serial.println("HTTP server started");
 }
 
-// server.arg("plain") for POST method body access
 
 void loop(void)
 {
     if (makingCoffee) {
       digitalWrite(led, LOW);
+      tempDelta = millis() - prevTime;
+      prevTime = millis();
+      if (tempDelta < 20000) {
+        // Then an overflow has not happened and I can update the real delta
+        deltaTime += tempDelta;
+      }
+      if (deltaTime > endTimeDelta) {
+        makingCoffee = false;
+      }
     } else {
       digitalWrite(led, HIGH);
     }

@@ -84,7 +84,7 @@ const char *indexPage =
 "            \"minutes=\" +\n"
 "            encodeURIComponent(minutes.value) +\n"
 "            \"&seconds=\" +\n"
-"            encodeURIComponent(minutes.value),\n"
+"            encodeURIComponent(seconds.value),\n"
 "        });\n"
 "        timerInterval = setInterval(() => {\n"
 "          if (seconds.value == 0) {\n"
