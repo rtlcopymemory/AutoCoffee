@@ -82,6 +82,8 @@ void setup(void)
     Serial.println("HTTP server started");
 }
 
+// server.arg("plain") for POST method body access
+
 void loop(void)
 {
     if (makingCoffee) {
