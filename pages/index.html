@@ -11,37 +11,39 @@
         font-size: 1.8em;
         width: 100%;
       }
-
       .content {
         max-width: 90%;
         margin: auto;
       }
-
       .status {
         text-align: center;
         padding: 1em 0;
         margin-top: 1em;
         background-color: red;
       }
-
       .status.waiting {
         background-color: orange;
       }
-
       .status.running {
         background-color: lightgreen;
       }
-
       .actions {
         margin: 2em auto;
         text-align: center;
       }
-
       .actions button {
         font-size: 0.8em;
         width: 6em;
         height: 2em;
         margin: 0.5em 1.5em;
+      }
+      .timer {
+        font-size: 0.6em;
+        text-align: center;
+      }
+      .timer input {
+        width: 3em;
+        font-size: 1em;
       }
     </style>
   </head>
@@ -58,24 +60,63 @@
           Stop
         </button>
       </div>
+      <div class="timer">
+        <input
+          type="number"
+          name="minutes"
+          id="minutes"
+          value="2"
+          min="0"
+          max="60"
+        />
+        :
+        <input
+          type="number"
+          name="seconds"
+          id="seconds"
+          value="30"
+          min="0"
+          max="60"
+        />
+      </div>
     </div>
     <script>
       let status = document.getElementById("status-div");
       let start = document.getElementById("start-btn");
       let stop = document.getElementById("stop-btn");
-
-      function toggle(onoff) {
-        fetch(onoff ? "/on" : "/off", {
-          method: "POST",
-        });
-      }
+      let minutes = document.getElementById("minutes");
+      let seconds = document.getElementById("seconds");
+      let timerInterval;
 
       start.addEventListener("click", () => {
-        toggle(true);
+        clearInterval(timerInterval);
+        fetch("/on", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          },
+          body:
+            "minutes=" +
+            encodeURIComponent(minutes.value) +
+            "&seconds=" +
+            encodeURIComponent(seconds.value),
+        });
+        timerInterval = setInterval(() => {
+          if (seconds.value == 0) {
+            if (minutes.value == 0) clearInterval(timerInterval);
+            else {
+              minutes.value--;
+              seconds.value = 59;
+            }
+          } else seconds.value--;
+        }, 1000);
       });
 
       stop.addEventListener("click", () => {
-        toggle(false);
+        fetch("/off", {
+          method: "POST",
+        });
+        clearInterval(timerInterval);
       });
 
       let checkStatus = (statusElement) => {

@@ -14,6 +14,14 @@ ESP8266WebServer server(80);
 const int led = 13;
 
 bool makingCoffee = false;
+unsigned long prevTime = 0;
+unsigned long deltaTime = 0;
+unsigned long tempDelta = 0;
+unsigned long endTimeDelta = 0;
+
+// milliseconds/seconds
+unsigned long precision = 3 * 100; // Calculated by taking 10 samples of actual time taken to switch off after the 0 seconds
+// It's not accurate cause I'm not using a RTC but millis() instead. In my case it was 3 secs every 10 secs. seconds * 1000 => 3/10 * 1000 mills/secs => 300
 
 void handleNotFound()
 {
@@ -30,6 +38,14 @@ void handleNotFound()
         message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
     }
     server.send(404, "text/plain", message);
+}
+
+void startTimer(int minutes, int seconds) {
+  if (minutes < 0 || seconds < 0) return;
+  deltaTime = 0;
+  prevTime = millis();
+  endTimeDelta = ((minutes * 60) + seconds) * 1000;
+  endTimeDelta -= (endTimeDelta/1000) * precision;
 }
 
 void setup(void)
@@ -67,6 +83,8 @@ void setup(void)
     });
 
     server.on("/on", []() {
+        // makingCoffee = true;
+        startTimer(server.arg("minutes").toInt(), server.arg("seconds").toInt());
         makingCoffee = true;
         server.send(200, "text/plain", "ok");
     });
@@ -82,13 +100,30 @@ void setup(void)
     Serial.println("HTTP server started");
 }
 
-void loop(void)
-{
-    if (makingCoffee) {
+void updateStatus() {
+  if (makingCoffee) {
       digitalWrite(led, LOW);
+      tempDelta = millis() - prevTime;
+      prevTime = millis();
+      
+      if (tempDelta < 20000) {
+        // Then an overflow has not happened and I can update the real delta
+        deltaTime += tempDelta;
+      }
+      
+      if (deltaTime >= endTimeDelta) {
+        makingCoffee = false;
+        digitalWrite(led, HIGH);
+      }
     } else {
       digitalWrite(led, HIGH);
     }
+}
+
+void loop(void)
+{
+    updateStatus();
     server.handleClient();
     MDNS.update();
+    updateStatus();
 }
