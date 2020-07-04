@@ -36,10 +36,11 @@ void handleNotFound()
     server.send(404, "text/plain", message);
 }
 
-void startTimer(String minutes, String seconds) {
+void startTimer(int minutes, int seconds) {
+  if (minutes < 0 || seconds < 0) return;
   deltaTime = 0;
   prevTime = millis();
-  endTimeDelta = (minutes.toInt() * 60000) + (seconds.toInt() * 1000);
+  endTimeDelta = ((minutes * 60) + seconds) * 1000;
 }
 
 void setup(void)
@@ -77,8 +78,9 @@ void setup(void)
     });
 
     server.on("/on", []() {
+        // makingCoffee = true;
+        startTimer(server.arg("minutes").toInt(), server.arg("seconds").toInt());
         makingCoffee = true;
-        startTimer(server.arg("minutes"), server.arg("seconds"));
         server.send(200, "text/plain", "ok");
     });
 
@@ -93,10 +95,8 @@ void setup(void)
     Serial.println("HTTP server started");
 }
 
-
-void loop(void)
-{
-    if (makingCoffee) {
+void updateStatus() {
+  if (makingCoffee) {
       digitalWrite(led, LOW);
       tempDelta = millis() - prevTime;
       prevTime = millis();
@@ -104,12 +104,19 @@ void loop(void)
         // Then an overflow has not happened and I can update the real delta
         deltaTime += tempDelta;
       }
-      if (deltaTime > endTimeDelta) {
+      if (deltaTime >= endTimeDelta) {
         makingCoffee = false;
+        digitalWrite(led, HIGH);
       }
     } else {
       digitalWrite(led, HIGH);
     }
+}
+
+void loop(void)
+{
+    updateStatus();
     server.handleClient();
     MDNS.update();
+    updateStatus();
 }

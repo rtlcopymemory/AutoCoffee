@@ -74,6 +74,7 @@
       let timerInterval;
 
       start.addEventListener("click", () => {
+        clearInterval(timerInterval);
         fetch("/on", {
           method: "POST",
           headers: {

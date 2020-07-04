@@ -75,6 +75,7 @@ const char *indexPage =
 "      let timerInterval;\n"
 "\n"
 "      start.addEventListener(\"click\", () => {\n"
+"        clearInterval(timerInterval);\n"
 "        fetch(\"/on\", {\n"
 "          method: \"POST\",\n"
 "          headers: {\n"
