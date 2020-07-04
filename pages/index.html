@@ -61,8 +61,23 @@
         </button>
       </div>
       <div class="timer">
-        <input type="number" name="minutes" id="minutes" value="2" /> :
-        <input type="number" name="seconds" id="seconds" value="30" />
+        <input
+          type="number"
+          name="minutes"
+          id="minutes"
+          value="2"
+          min="0"
+          max="60"
+        />
+        :
+        <input
+          type="number"
+          name="seconds"
+          id="seconds"
+          value="30"
+          min="0"
+          max="60"
+        />
       </div>
     </div>
     <script>

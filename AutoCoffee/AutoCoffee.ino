@@ -19,6 +19,10 @@ unsigned long deltaTime = 0;
 unsigned long tempDelta = 0;
 unsigned long endTimeDelta = 0;
 
+// milliseconds/seconds
+unsigned long precision = 3 * 100; // Calculated by taking 10 samples of actual time taken to switch off after the 0 seconds
+// It's not accurate cause I'm not using a RTC but millis() instead. In my case it was 3 secs every 10 secs. seconds * 1000 => 3/10 * 1000 mills/secs => 300
+
 void handleNotFound()
 {
     String message = "File Not Found\n\n";
@@ -41,6 +45,7 @@ void startTimer(int minutes, int seconds) {
   deltaTime = 0;
   prevTime = millis();
   endTimeDelta = ((minutes * 60) + seconds) * 1000;
+  endTimeDelta -= (endTimeDelta/1000) * precision;
 }
 
 void setup(void)
@@ -100,10 +105,12 @@ void updateStatus() {
       digitalWrite(led, LOW);
       tempDelta = millis() - prevTime;
       prevTime = millis();
+      
       if (tempDelta < 20000) {
         // Then an overflow has not happened and I can update the real delta
         deltaTime += tempDelta;
       }
+      
       if (deltaTime >= endTimeDelta) {
         makingCoffee = false;
         digitalWrite(led, HIGH);
