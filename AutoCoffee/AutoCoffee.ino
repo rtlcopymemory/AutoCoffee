@@ -2,6 +2,9 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+ 
+#include <Wire.h>
+#include "DS3231.h"
 
 #include "credentials.h"
 #include "index.h"
@@ -9,15 +12,25 @@
 const char *ssid = SSID;
 const char *password = PASSWORD;
 
+RTClib RTC;
+// DS3231 rtclock;
+
+/*
+    rtclock.setSecond(59);
+    rtclock.setMinute(50);
+    rtclock.setHour(14);
+    rtclock.setDoW(4);
+    rtclock.setDate(9);
+    rtclock.setMonth(7);
+    rtclock.setYear(20);
+ */
+
 ESP8266WebServer server(80);
 
 const int led = 13;
 
 bool makingCoffee = false;
-unsigned long prevTime = 0;
-unsigned long deltaTime = 0;
-unsigned long tempDelta = 0;
-unsigned long endTimeDelta = 0;
+uint32_t timerStop = 0;
 
 // milliseconds/seconds
 unsigned long precision = 3 * 100; // Calculated by taking 10 samples of actual time taken to switch off after the 0 seconds
@@ -42,10 +55,7 @@ void handleNotFound()
 
 void startTimer(int minutes, int seconds) {
   if (minutes < 0 || seconds < 0) return;
-  deltaTime = 0;
-  prevTime = millis();
-  endTimeDelta = ((minutes * 60) + seconds) * 1000;
-  endTimeDelta -= (endTimeDelta/1000) * precision;
+  timerStop = RTC.now().unixtime() + (minutes * 60) + seconds;
 }
 
 void setup(void)
@@ -53,6 +63,7 @@ void setup(void)
     pinMode(led, OUTPUT);
     digitalWrite(led, HIGH);
     Serial.begin(115200);
+    Wire.begin();
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     Serial.println("");
@@ -103,15 +114,11 @@ void setup(void)
 void updateStatus() {
   if (makingCoffee) {
       digitalWrite(led, LOW);
-      tempDelta = millis() - prevTime;
-      prevTime = millis();
-      
-      if (tempDelta < 20000) {
-        // Then an overflow has not happened and I can update the real delta
-        deltaTime += tempDelta;
-      }
-      
-      if (deltaTime >= endTimeDelta) {
+      Serial.print("Time: ");
+      Serial.println(RTC.now().unixtime());
+      Serial.print("Should stop at: ");
+      Serial.println(timerStop);
+      if (RTC.now().unixtime() >= timerStop) {
         makingCoffee = false;
         digitalWrite(led, HIGH);
       }
